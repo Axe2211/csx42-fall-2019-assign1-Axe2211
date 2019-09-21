@@ -3,14 +3,15 @@ import java.io.File;
 import java.util.Scanner;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 
 
 public class FileProcessor {
 	private String fileName;
-    private File inputFile;
+    private File file;
     private Scanner inputFileHandler;
-    private PrintWriter outputFileHandler;
-
+    
     //constructor
     public FileProcessor(String fileNameIn){
 
@@ -19,18 +20,19 @@ public class FileProcessor {
             System.exit(1);
         }
         else{
-            fileName = fileNameIn;
+            this.fileName = fileNameIn;
         }
+        //input mode
+        
         try{
-            inputFile = new File(fileName);
-            //outputFileHandler = new PrintWriter(inputFile);
-            inputFileHandler = new Scanner(inputFile);
+            this.file = new File(this.fileName);
+            //outputFileHandler = new PrintWriter(File);
+            this.inputFileHandler = new Scanner(this.file);
         }
         catch(FileNotFoundException ex){
             System.err.println("File Not Found in specified location..");
-            System.exit(0);
+            System.exit(1);
         }
-
     }
 
     public String readLine(){
@@ -48,5 +50,9 @@ public class FileProcessor {
         }
         currentLine = null;
         return currentLine;
+    }
+
+    public void closeInFile(){
+        inputFileHandler.close();
     }
 }
