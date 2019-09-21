@@ -5,7 +5,11 @@ import java.util.List;
 import java.util.Iterator;
 import coursesRegistration.util.FileProcessor;
 import coursesRegistration.inputds.CoursePool;
+import coursesRegistration.inputds.Course;
 import coursesRegistration.inputds.StudentPool;
+import coursesRegistration.inputds.Student;
+import coursesRegistration.scheduler.CourseAllocation;
+import coursesRegistration.util.Results;
 
 /**
  * @author John Doe
@@ -30,85 +34,19 @@ public class Driver {
 
 		FileProcessor studentData = new FileProcessor(args[0]);
 		FileProcessor courseData = new FileProcessor(args[1]);
-		String line = null;
-		List<CoursePool> coursePool = new ArrayList<>();
-		List<StudentPool> studentPool = new ArrayList<>();
+		
+		CoursePool coursePool = new CoursePool();
+		StudentPool studentPool = new StudentPool();
+		Results result = new Results();
 
-		try{
-			while((line = studentData.readLine()) != null){
-			//	System.out.println(line);
-				
-				String[] readId = null;
-				String[] readYear = null;
-				int readYearInt = 0;
-				String[] readCPreference = null;
-				readId = line.split(" ");
-				readYear = readId[1].split("::");
-				if(readYear[1].toUpperCase().equals("FIRST_YEAR")){
-					readYearInt = 1;
-				}
-				else if(readYear[1].toUpperCase().equals("SECOND_YEAR")){
-					readYearInt = 2;			
-				}
-				else if(readYear[1].toUpperCase().equals("THIRD_YEAR")){
-					readYearInt = 3;		
-				}
-				else{
-					System.err.println("Incorrect Options found in Student Year field in input file: " + args[0]);
-				}
-				readCPreference = readYear[0].split(",");
-				studentPool.add(new StudentPool(Integer.parseInt(readId[0]), readYearInt, readCPreference));		
-			}
-		}
-		catch(NumberFormatException e){
-			System.out.println("Formatting Error: " + e);
-		}
-		catch(ArrayIndexOutOfBoundsException e){
-			System.out.println("Array Index Error: " + e);
-		}
-		/*
-		Iterator studentItr = studentPool.iterator();
-		System.out.println("Student List: ");
-		while(studentItr.hasNext()){
-			StudentPool nextElement = (StudentPool)studentItr.next();
-			System.out.println("Student Id: " + nextElement.getStudentId());
-			System.out.println("Student Year: " + nextElement.getStudentYear() + "\n");
-			for(int cPrefIndex = 0; cPrefIndex < nextElement.getCoursePreference().length; cPrefIndex++){
-				System.out.print(" Preference " + cPrefIndex + ": " + nextElement.getCoursePreference()[cPrefIndex]);
-			}
-			System.out.println();
-		}
-		*/
-		line = null;
-		try{
-			while((line = courseData.readLine()) != null){
-				//System.out.println(line);
-				String[] splitSpaceCourse = null;
-				String[] splitSColonCapacityTiming = null;
-				
-				splitSpaceCourse = line.split(" ");
-				splitSColonCapacityTiming = splitSpaceCourse[1].split(";");
+		coursePool.loadList(courseData);
+		studentPool.loadList(studentData);
+		
+		CourseAllocation allocater = new CourseAllocation(studentPool, coursePool);
 
-				String readCourse = splitSpaceCourse[0];
-				String readCapacity = splitSColonCapacityTiming[0].split(":")[1];
-				String readTiming = splitSColonCapacityTiming[1].split(":")[1];
-
-				coursePool.add(new CoursePool(readCourse, Integer.parseInt(readCapacity), Integer.parseInt(readTiming)));		
-			}
-		}
-		catch(NumberFormatException e){
-			System.out.println("Formatting Error: " + e);
-		}
-		/*
-		Iterator courseItr = coursePool.iterator();
-		System.out.println("Course List: ");
-		while(courseItr.hasNext()){
-			CoursePool nextElement = (CoursePool)courseItr.next();
-			System.out.println("Course Name: " + nextElement.getCourseName());
-			System.out.println("Course Capacity: " + nextElement.getCourseCapacity());
-			System.out.print(" Class Timing: "  + nextElement.getClassTimings());
-			System.out.println();
-		}
-		*/
+		allocater.allocate();
+		
+		 result.writeToFile(allocater, args[2]);
+		 result.writeToStdOut(allocater);
 	}
 }
