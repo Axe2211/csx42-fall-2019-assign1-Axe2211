@@ -1,40 +1,58 @@
 package coursesRegistration.inputds;
 
-public class CoursePool{
-   //data members
-   private String courseName;
-   private int courseCapacity;
-   private int classTiming;
+import coursesRegistration.inputds.Course;
+import coursesRegistration.inputds.Pool;
+import coursesRegistration.util.FileProcessor;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ArrayList;
+import java.lang.Iterable;
 
-   // constructor
-   public CoursePool(String courseNameIn, int courseCapacityIn, int classTimingIn){
-       courseName = courseNameIn;
-       courseCapacity = courseCapacityIn;
-       classTiming = classTimingIn;
-   }
+public class CoursePool implements Pool{
+    private List<Course> courseList;
 
-   //get set methods
-   public String getCourseName(){
-       return courseName;
-   };
+	//constructor
+    public CoursePool(){
+        this.courseList = new ArrayList<Course>();
+    }
 
-   public int getCourseCapacity(){
-       return courseCapacity;
-   };
+    //method to load data into studentList
+    public void loadList(FileProcessor file){
+        String line = null;
+        String[] splitSpaceCourse = null;
+		String[] splitSColonCapacityTiming = null;
+        try{
+			while((line = file.readLine()) != null){
+				//System.out.println(line);
+                splitSpaceCourse = line.split(" ");
+				splitSColonCapacityTiming = splitSpaceCourse[1].split(";");
 
-   public int getClassTimings(){
-       return classTiming;
-   };
+				String readCourse = splitSpaceCourse[0];
+				String readCapacity = splitSColonCapacityTiming[0].split(":")[1];
+				String readTiming = splitSColonCapacityTiming[1].split(":")[1];
 
-   public void setCourseName(String courseNameIn){
-       courseName = courseNameIn;
-   }
+				courseList.add(new Course(readCourse, Integer.parseInt(readCapacity), Integer.parseInt(readTiming)));		
+			}
+		}
+		catch(NumberFormatException e){
+			System.out.println("Formatting Error: " + e);
+		}
+        catch(ArrayIndexOutOfBoundsException e){
+			System.out.println("Array Index Error: " + e + "\n Please remove lines without any data lines without data from the input file..");
+		}
+    }
 
-   public void setCourseCapacity(int courseCapacityIn){
-       courseCapacity = courseCapacityIn;
-   };
+	public List<Course> getCourseList(){
+		return courseList;
+	}
 
-   public void setClassTimings(int classTimingIn){
-       classTiming = classTimingIn;
-   };
+	public Course getCourse(String courseIn){
+		Iterator courseItr = courseList.iterator();
+        Course currentCourse = (Course)courseItr.next();
+        while(!courseIn.equals(currentCourse.getCourseName())){
+            currentCourse = (Course)courseItr.next();
+            continue;
+        }
+		return currentCourse;
+	}
 }
